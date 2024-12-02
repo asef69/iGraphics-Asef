@@ -1,5 +1,6 @@
 #include "iGraphics.h"
 #include <GL\glut.h>
+#include<math.h>
 
 void background();
 void about();
@@ -25,42 +26,31 @@ int bg = 1;
 // int easypage = 0;
 int scoreapage = 0;
 bool musicOn = true;
-int x = 470, y = 320, r = 20;
+int x = 470, y = 300, r = 20;
 int bx = 470, by = 95;
+int state;
+int click;
+int ballspeed = 2;
+int ballstate = 0;
+int ax, ay;
+int ballx,bally;
 /*
 	function iDraw() is called again and again by the system.
 
 	*/
-void moveGoalkeeper(unsigned char key)
-{
-	if (key == 'w')
-	{
-		iShowBMP2(470, 320, "picture\\up.bmp", 0);
-	}
-	if (key == 'a')
-	{
-		iShowBMP2(470, 320, "picture\\bottom left.bmp", 0);
-	}
-	if (key == 'd')
-	{
-		iShowBMP2(470, 320, "picture\\bottom right.bmp", 0);
-	}
-	if (key == 'e')
-	{
-		iShowBMP2(470, 320, "picture\\right corner.bmp", 0);
-	}
-	if (key == 'q')
-	{
-		iShowBMP2(470, 320, "picture\\left corner.bmp", 0);
-	}
-}
+char a[7][100] = {{"picture\\stand.bmp"}, {"picture\\bottom left.bmp"}, {"picture\\bottom right.bmp"}, {"picture\\right corner.bmp"}, {"picture\\left corner.bmp"}, {"picture\\top right.bmp"}, {"picture\\up.bmp"}};
+
+char b[5][100] = {{"picture\\ball.bmp"}, {"picture\\ball.bmp"}, {"picture\\ball.bmp"}, {"picture\\ball.bmp"}, {"picture\\ball.bmp"}};
 void iDraw()
 {
 	// place your drawing codes here
 	iClear();
 
 	if (bg == 1)
-	{
+	{	
+		ballstate=0;
+		by=95;
+		bx=470;
 		background();
 	}
 	else if (aboutbutton == 1)
@@ -83,6 +73,38 @@ void iDraw()
 	{
 		drawscorepage();
 	}
+	else
+		iShowBMP2(x, y, a[state], 0);
+	if (ballstate == 1 && ax >= 252 && ax <= 755 && ay >= 345 && ay <= 534)
+	{	
+		
+		for (int i = 0; i < 5; i++)
+		{
+			if (ballx >= 252 && ballx <= 755 && bally >= 95 && bally <= 534)
+			{
+				iShowBMP2(bx, by, b[i], 0);
+				by += (ballspeed*(bally-95)/(sqrt((bally-95)*(bally-95)+(ballx-470)*(ballx-470))));
+				bx += ballspeed*(ballx-470)/(sqrt((bally-95)*(bally-95)+(ballx-470)*(ballx-470)));
+				//printf("%d %d\n", bx, by);
+				if((bx<ballx+100 && by<100+bally &&bx>ballx-100 && by>bally-100)||(bx<100 || by<30 ||bx>iScreenWidth-100 || by>iScreenHeight-100))
+				{
+					ballstate=0;
+					by=95;
+					bx=470;
+					break;
+				}
+
+			}
+			else
+			{
+				iShowBMP2(bx, by, b[i], 0);
+				break;
+			}
+		}
+		
+	}
+	else
+		ballstate=0;
 }
 
 /*
@@ -105,8 +127,12 @@ void iMouse(int button, int state, int mx, int my)
 	{
 		// place your codes here
 		printf("x = %d, y= %d\n", mx, my);
-		// x += 10;
-		// y += 10;
+		if(startpg==1)
+		{ballstate = 1;
+		ballx=mx;
+		bally=my;
+		ax = mx;
+		ay = my;}
 		if (bg == 1 && (mx >= 434 && mx <= 564) && (my >= 337 && my <= 378))
 		{
 			aboutbuttonclick();
@@ -127,7 +153,7 @@ void iMouse(int button, int state, int mx, int my)
 		{
 			scorebuttonclickhandler();
 		}
-		else if (bg == 1 || aboutbutton == 1 || instructionpg == 1 || startpg == 1)
+		else if (bg == 1 || aboutbutton == 1 || instructionpg == 1 || startpg == 1 || scoreapage == 1)
 		{
 			if ((mx >= 75 && mx <= 195) && (my >= 565 && my <= 600))
 			{
@@ -155,23 +181,31 @@ void iKeyboard(unsigned char key)
 	}
 	if (key == 'w')
 	{
-		iShowBMP2(470, 320, "picture\\up.bmp", 0);
+		state = 1;
 	}
 	if (key == 'a')
 	{
-		iShowBMP2(470, 320, "picture\\bottom left.bmp", 0);
+		state = 2;
 	}
 	if (key == 'd')
 	{
-		iShowBMP2(470, 320, "picture\\bottom right.bmp", 0);
+		state = 3;
 	}
 	if (key == 'e')
 	{
-		iShowBMP2(470, 320, "picture\\right corner.bmp", 0);
+		state = 4;
 	}
-	if (key == 'q')
+	if (key == 'v')
 	{
-		iShowBMP2(470, 320, "picture\\left corner.bmp", 0);
+		state = 5;
+	}
+	if (key == 's')
+	{
+		state = 6;
+	}
+	if (key == 'f')
+	{
+		state = 0;
 	}
 	if (key == GLUT_KEY_F1)
 	{
@@ -185,9 +219,6 @@ void iKeyboard(unsigned char key)
 			PlaySound("song.wav", NULL, SND_LOOP | SND_ASYNC);
 			musicOn = true;
 		}
-	}
-	if(key==' '){
-		iShowBMP2(470, 320, "picture\\stand.bmp", 0);
 	}
 }
 
@@ -226,13 +257,15 @@ void startpage()
 	iFilledRectangle(0, 0, 1000, 600);
 	iShowBMP2(50, 0, "picture\\1.bmp", 0);
 	// iShowBMP2(400, 150, "picture\\e-m-h.bmp", 0);
-	iShowBMP2(470, 95, "picture\\ball.bmp", 0);
+	// iShowBMP2(470, 320, "picture\\stand.bmp", 0);
+	// iShowBMP2(470, 95, "picture\\ball.bmp", 0);
 	iShowBMP2(250, 515, "picture\\target.bmp", 0);
 	iShowBMP2(480, 520, "picture\\target.bmp", 0);
 	iShowBMP2(740, 515, "picture\\target.bmp", 0);
 	iShowBMP2(240, 340, "picture\\target.bmp", 0);
 	iShowBMP2(750, 340, "picture\\target.bmp", 0);
 	iShowBMP2(95, 565, "picture\\back.bmp", 0);
+	iShowBMP2(x, y, a[state], 0);
 }
 /*void draweasypage()
 {
@@ -303,6 +336,7 @@ int main()
 	{
 		PlaySound("song.wav", NULL, SND_LOOP | SND_ASYNC);
 	}
+	iSetTimer(20, iDraw);
 	iInitialize(1000, 600, "2D PENALTY SAVING GAME");
 	return 0;
 }
