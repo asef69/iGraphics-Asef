@@ -43,8 +43,7 @@ char lastKey = '\0';
 bool scoreReset = false;
 int miss = 0;
 
-bool ballVisible = true; // Initially, the ball is visible
-
+bool ballVisible = true;
 
 char UserScores[10][15] = {};
 struct PlayerScore
@@ -62,7 +61,7 @@ int collisionX = 0, collisionY = 0;
 
 void collision(int sx, int sy, char click)
 {
-	if ((sx >= 300 && sx <= 430) && (sy >= 350 && sy <= 410) && click == 'w') // Example collision condition
+	if ((sx >= 300 && sx <= 430) && (sy >= 350 && sy <= 410) && click == 'w')
 	{
 		collisionDetected = true;
 		iSetColor(255, 255, 255);
@@ -73,11 +72,11 @@ void collision(int sx, int sy, char click)
 
 		if (score > highestScore)
 		{
-			HighScores[10].pscore = score;						   // Update the highest score
-			sprintf(highestScoreText, "Highest Score: %d", score); // Update the highest score string
+			HighScores[10].pscore = score;
+			sprintf(highestScoreText, "Highest Score: %d", score);
 		}
 	}
-	else if ((sx >= 430 && sx <= 770) && (sy >= 350 && sy <= 410) && click == 'a') // Example collision condition
+	else if ((sx >= 430 && sx <= 770) && (sy >= 350 && sy <= 410) && click == 'a')
 	{
 		collisionDetected = true;
 		collisionX = sx;
@@ -147,25 +146,35 @@ void collision(int sx, int sy, char click)
 	}
 }
 
-void loadHighestScore()
-{
-	FILE *file = fopen("E:\\term project\\highest_score.txt", "r");
-	if (file != NULL)
-	{
-		fscanf(file, "%d", &highestScore);
-		fclose(file);
-	}
-	sprintf(highestScoreText, "Highest Score: %d", highestScore);
-}
-
 void saveHighestScore()
 {
-	FILE *file = fopen("E:\\term project\\highest_score.txt", "a");
+	FILE *file = fopen("E:\\term project\\highest_score.txt", "w");
 	if (file != NULL)
 	{
 		fprintf(file, "%d", highestScore);
 		fclose(file);
 		printf("Highest score saved: %d\n", highestScore);
+	}
+	else
+	{
+		printf("Error: Could not open file to save highest score.\n");
+	}
+}
+
+void loadHighestScore()
+{
+	FILE *file = fopen("E:\\term project\\highest_score.txt", "r");
+	if (file != NULL)
+	{
+		if (fscanf(file, "%d", &highestScore) == 1)
+		{
+			printf("Highest score loaded: %d\n", highestScore);
+		}
+		fclose(file);
+	}
+	else
+	{
+		printf("Error: Could not open file to load highest score.\n");
 	}
 }
 
@@ -293,12 +302,11 @@ void iDraw()
 
 void resetBall()
 {
-    ballVisible = true;  
-    bx = 470;            
-    by = 95;
-    printf("Ball reset!\n");
+	ballVisible = true;
+	bx = 470;
+	by = 95;
+	printf("Ball reset!\n");
 }
-
 
 void resetCollision()
 {
@@ -346,11 +354,11 @@ void iMouse(int button, int state, int mx, int my)
 				backbuttonclickhandler();
 			}
 		}
-		 if (mx >= bx && mx <= bx + r * 2 && my >= by && my <= by + r * 2) 
-        {
-            ballVisible = false; 
-            printf("Ball vanished! Mouse clicked at (%d, %d)\n", mx, my);
-        }
+		if (mx >= bx && mx <= bx + r * 2 && my >= by && my <= by + r * 2)
+		{
+			ballVisible = false;
+			printf("Ball vanished! Mouse clicked at (%d, %d)\n", mx, my);
+		}
 	}
 	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
 	{
@@ -475,6 +483,7 @@ void drawscorepage()
 
 	SortScores();
 	ShowHighScores();
+	sprintf(highestScoreText, "Highest Score: %d", highestScore);
 	iText(400, 300, highestScoreText, GLUT_BITMAP_TIMES_ROMAN_24);
 }
 void aboutbuttonclick()
@@ -517,13 +526,12 @@ void backbuttonclickhandler()
 	startpg = 0;
 	scoreapage = 0;
 
-	score = 0;
 	if (score > highestScore)
 	{
 		highestScore = score;
 		saveHighestScore();
-		updateHighestScore();
 	}
+
 	resetScore();
 }
 
