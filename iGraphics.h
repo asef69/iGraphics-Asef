@@ -465,11 +465,14 @@ void iClear()
     glClearColor(0,0,0,0);
     glFlush();
 }
-
+int f1,f2;
 void displayFF(void){
-
+    f1=glutGet(GLUT_ELAPSED_TIME);
+    if(f1-f2>100){
     iDraw();
     glutSwapBuffers() ;
+    f2 = f1;
+    }
 }
 
 void animFF(void)
